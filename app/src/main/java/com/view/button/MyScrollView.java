@@ -41,6 +41,7 @@ public class MyScrollView extends LinearLayout {
     private ScrollView scrollView2;
     private ScrollView scrollView3;
     private LinearLayout thisLayout;
+    private int topHeight = 0;
 
     public MyScrollView(Context context) {
         super(context);
@@ -79,6 +80,7 @@ public class MyScrollView extends LinearLayout {
         viewPager.post(new Runnable() {
             @Override
             public void run() {
+                topHeight = topView.getMeasuredHeight();
                 ViewGroup.LayoutParams params = viewPager.getLayoutParams();
                 params.height = getMeasuredHeight() - topView.getMeasuredHeight();
                 viewPager.setLayoutParams(params);
@@ -141,51 +143,133 @@ public class MyScrollView extends LinearLayout {
 
     }
 
+
+    int lastY = 0;
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        return super.dispatchTouchEvent(ev);
-
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Log.i(TAG, "onInterceptTouchEvent");
+        Log.i(TAG, "dispatchTouchEvent ");
         int action = ev.getAction();
         float y = ev.getY();
         float x = ev.getX();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                start = y;
+                startY = y;
                 startX = x;
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.i(TAG, "onInterceptTouchEvent  " + isTopHidden + "   " + mScrollView);
-                float dy = y - start;
+                float dy = y - startY;
                 //横向滑动不拦截
-                if (Math.abs(x - startX) > Math.abs(y - start)) {
-                    return false;
+                if (Math.abs(x - startX) > Math.abs(y - startY)) {
+//                    return false;
+                }else {
+                    ScrollView scrollView;
+                    if(viewPager.getCurrentItem()==0){
+                        scrollView = mScrollView;
+                    }else if(viewPager.getCurrentItem()==1){
+                        scrollView = scrollView2;
+                    }else {
+                        scrollView = scrollView3;
+                    }
+                    //手指向上滑
+                    if(dy<0){
+                        if(this.getScrollY() < topHeight) {
+                            Log.i(TAG, "dispatchTouchEvent this="+dy);
+//                            return true;
+                        }else {
+                            Log.i(TAG, "dispatchTouchEvent mScrollView=" + dy);
+//                            scrollView.scrollBy(0,-(int)dy);
+//                            return false;
+                        }
+                    }
+                    //手指向下滑
+                    else {
+
+                        if(scrollView.getScrollY()==0){
+//                            this.scrollBy(0,-(int)dy);
+//                            viewPager.requestDisallowInterceptTouchEvent(true);
+//                            return true;
+//                            this.onInterceptTouchEvent(ev);
+                            Log.i(TAG, "dispatchTouchEvent 手指向下滑"+y+"   "+lastY);
+                            Log.i(TAG, "dispatchTouchEvent 手指向下滑"+(-y+lastY));
+                            this.scrollBy(0,-(int)y+lastY);
+                        }else {
+//                            return false;
+//                            scrollView.scrollBy(0,-(int)dy);
+                        }
+
+                    }
                 }
-                //当顶部没有完全挡住，或者完全挡住后下滑，拦截触摸事件
-                if (!isTopHidden) {
-                    return true;
-                }
-                if (mScrollView.getScrollY() == 0 && isTopHidden && dy > 0 && viewPager.getCurrentItem() == 0) {
-                    return true;
-                }
-                if (scrollView2.getScrollY() == 0 && isTopHidden && dy > 0 && viewPager.getCurrentItem() == 1) {
-                    return true;
-                }
-                if (scrollView3.getScrollY() == 0 && isTopHidden && dy > 0 && viewPager.getCurrentItem() == 2) {
-                    return true;
-                }
+                lastY = (int)y;
+                Log.i(TAG, "dispatchTouchEvent end"+lastY);
+            case MotionEvent.ACTION_UP:
+//                lastY = 0;
                 break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        Log.i(TAG, "onInterceptTouchEvent all");
+        int action = ev.getAction();
+        float y = ev.getY();
+        float x = ev.getX();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                startY = y;
+                startX = x;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float dy = y - startY;
+                //横向滑动不拦截
+                if (Math.abs(x - startX) > Math.abs(y - startY)) {
+                    Log.i(TAG, "onInterceptTouchEvent 横向滑动不拦截");
+                    return false;
+                }else {
+                    ScrollView scrollView;
+                    if(viewPager.getCurrentItem()==0){
+                        scrollView = mScrollView;
+                    }else if(viewPager.getCurrentItem()==1){
+                        scrollView = scrollView2;
+                    }else {
+                        scrollView = scrollView3;
+                    }
+                    //手指向上滑
+                    if(dy<0){
+                        if(this.getScrollY() < topHeight) {
+                            Log.i(TAG, "onInterceptTouchEvent this="+dy);
+                            return true;
+                        }else {
+                            Log.i(TAG, "onInterceptTouchEvent mScrollView=" + dy);
+//                            scrollView.scrollBy(0,-(int)dy);
+                            return false;
+                        }
+                    }
+                    //手指向下滑
+                    else {
+                        if(scrollView.getScrollY()==0){
+                            Log.i(TAG, "onInterceptTouchEvent this="+scrollView.getScrollY());
+                            if(this.getScrollY()==0){
+                                return false;
+                            }else {
+
+                            }
+//                            this.scrollBy(0,-(int)dy);
+                            return true;
+                        }else {
+                            Log.i(TAG, "onInterceptTouchEvent scrollView="+scrollView.getScrollY());
+                            return false;
+//                            scrollView.scrollBy(0,-(int)dy);
+                        }
+                    }
+                }
             case MotionEvent.ACTION_UP:
                 break;
         }
         return super.onInterceptTouchEvent(ev);
     }
 
-    private float start = 0;
+    private float startY = 0;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -194,19 +278,50 @@ public class MyScrollView extends LinearLayout {
         float y = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                start = y;
+                startY = y;
                 mVelocityTracker.clear();
                 mVelocityTracker.addMovement(event);
                 return true;
             case MotionEvent.ACTION_MOVE:
-                float dy = y - start;
-                //dy>0向下
-                scrollBy(0, -(int) dy);
-                //否则滑动后停止，动画还会继续
-                start = y;
+                float dy = y - startY;
+                startY = y;
+
+                Log.i(TAG, "onTouchEvent "+dy);
+                ScrollView scrollView;
+                if(viewPager.getCurrentItem()==0){
+                    scrollView = mScrollView;
+                }else if(viewPager.getCurrentItem()==1){
+                    scrollView = scrollView2;
+                }else {
+                    scrollView = scrollView3;
+                }
+                //手指向上滑
+                if(dy<0){
+                    if(this.getScrollY() < topHeight) {
+                        Log.i(TAG, "onTouchEvent this="+dy);
+                        scrollBy(0, -(int) dy);
+                    }else {
+                        Log.i(TAG, "onTouchEvent mScrollView="+dy);
+                        scrollView.scrollBy(0,-(int)dy);
+                    }
+                }
+                //手指向下滑
+                else {
+                    if(scrollView.getScrollY()==0){
+                        if(this.getScrollY()==0){
+
+                        }else {
+                            this.scrollBy(0,-(int)dy);
+                        }
+
+                    }else {
+                        scrollView.scrollBy(0,-(int)dy);
+                    }
+                }
+
                 break;
             case MotionEvent.ACTION_UP:
-               mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                 int velocityY = (int) mVelocityTracker.getYVelocity();
                 if (Math.abs(velocityY) > mMinimumVelocity) {
                     fling(-velocityY);
