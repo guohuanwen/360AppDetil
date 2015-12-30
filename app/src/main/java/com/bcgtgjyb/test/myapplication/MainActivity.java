@@ -5,8 +5,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.view.button.MyScrollView;
-
 
 public class MainActivity extends ActionBarActivity {
 
@@ -14,7 +12,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(new MyScrollView(this));
+        setContentView(R.layout.my_scroll_view);
     }
 
 

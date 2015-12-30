@@ -40,6 +40,7 @@ public class MyScrollView extends LinearLayout {
     private ViewGroup view;
     private ScrollView scrollView2;
     private ScrollView scrollView3;
+    private LinearLayout thisLayout;
 
     public MyScrollView(Context context) {
         super(context);
@@ -52,29 +53,39 @@ public class MyScrollView extends LinearLayout {
         super(context, attrs);
         mContext = context;
         init();
-
-    }
-
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-//        init();
     }
 
     private void init() {
-        Log.i(TAG, "MyScrollView: ");
-        LayoutInflater.from(mContext).inflate(R.layout.my_scroll_view, this);
-        topView = findViewById(R.id.topView);
-        center = (TabView) findViewById(R.id.tab_view);
-        viewPager = (ViewPager) findViewById(R.id.view_pager);
-        initViewPager();
         mScroller = new OverScroller(mContext);
         mVelocityTracker = VelocityTracker.obtain();
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
         mMaximumVelocity = ViewConfiguration.get(mContext).getScaledMaximumFlingVelocity();
         mMinimumVelocity = ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity();
-//        initHeight();
-//        setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,getMeasuredHeight()+center.getMeasuredHeight()));
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        initView();
+    }
+
+    private void initView() {
+        Log.i(TAG, "MyScrollView: ");
+        thisLayout = this;
+        topView = findViewById(R.id.topView);
+        center = (TabView) findViewById(R.id.tab_view);
+        viewPager = (ViewPager) findViewById(R.id.view_pager);
+        initViewPager();
+        viewPager.post(new Runnable() {
+            @Override
+            public void run() {
+                ViewGroup.LayoutParams params = viewPager.getLayoutParams();
+                params.height = getMeasuredHeight() - topView.getMeasuredHeight();
+                viewPager.setLayoutParams(params);
+                thisLayout.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, thisLayout.getMeasuredHeight() + topView.getMeasuredHeight()));
+
+            }
+        });
     }
 
     private void initViewPager() {
@@ -83,8 +94,6 @@ public class MyScrollView extends LinearLayout {
         mScrollView = (ScrollView) view.findViewById(R.id.scrollView1);
         scrollView2 = (ScrollView) view.findViewById(R.id.scrollView2);
         scrollView3 = (ScrollView) view.findViewById(R.id.scrollView3);
-        int height = viewPager.getMeasuredHeight();
-
         view.removeAllViews();
         list.add(mScrollView);
         list.add(scrollView2);
@@ -108,13 +117,6 @@ public class MyScrollView extends LinearLayout {
         });
     }
 
-    public void initHeight() {
-        ViewGroup.LayoutParams params = viewPager.getLayoutParams();
-        params.height = getMeasuredHeight() - topView.getMeasuredHeight();
-        viewPager.setLayoutParams(params);
-        this.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getMeasuredHeight() + topView.getMeasuredHeight()));
-
-    }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -122,30 +124,9 @@ public class MyScrollView extends LinearLayout {
         Log.i(TAG, "onSizeChanged ");
     }
 
-    private int s = 0;
-    private int winHeight;
-    private int centerHeight;
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int sizeWidth = MeasureSpec.getSize(widthMeasureSpec);
-        int sizeHeight = MeasureSpec.getSize(heightMeasureSpec);
-        centerHeight = center.getMeasuredHeight();
-
-        if(s==0) {
-            winHeight = sizeHeight;
-            ViewGroup.LayoutParams params = viewPager.getLayoutParams();
-            params.height = getMeasuredHeight() - topView.getMeasuredHeight();
-            this.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getMeasuredHeight() + topView.getMeasuredHeight()));
-            s=1;
-        }
-
-//        mScrollView.setLayoutParams(layoutParams);
-//        scrollView2.setLayoutParams(layoutParams);
-//        scrollView3.setLayoutParams(layoutParams);
-        Log.i(TAG, "onMeasure sizeWidth=" + sizeWidth + "   sizeHeight=" + sizeHeight + "  centerHeight=" + centerHeight + "  winHeight" + winHeight+"  mScrollView"+mScrollView.getMeasuredHeight());
-
     }
 
     public void fling(int velocityY) {
@@ -213,7 +194,6 @@ public class MyScrollView extends LinearLayout {
         float y = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                viewPager.setVisibility(View.GONE);
                 start = y;
                 mVelocityTracker.clear();
                 mVelocityTracker.addMovement(event);
@@ -226,9 +206,7 @@ public class MyScrollView extends LinearLayout {
                 start = y;
                 break;
             case MotionEvent.ACTION_UP:
-                viewPager.setVisibility(View.VISIBLE);
-                viewPager.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, winHeight - centerHeight));
-                mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+               mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                 int velocityY = (int) mVelocityTracker.getYVelocity();
                 if (Math.abs(velocityY) > mMinimumVelocity) {
                     fling(-velocityY);
