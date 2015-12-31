@@ -155,6 +155,7 @@ public class MyScrollView extends LinearLayout {
             case MotionEvent.ACTION_DOWN:
                 startY = y;
                 startX = x;
+                lastY = (int)y;
                 break;
             case MotionEvent.ACTION_MOVE:
                 float dy = y - startY;
