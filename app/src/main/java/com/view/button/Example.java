@@ -1,6 +1,7 @@
 package com.view.button;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -16,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
 
+import com.another.custom.view.AnotherActivity;
 import com.bcgtgjyb.test.myapplication.R;
 
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2015/11/24.
  */
-public class MyScrollView extends LinearLayout {
+public class Example extends LinearLayout {
     private TabView center;
     private View topView;
     private ScrollView mScrollView;
@@ -43,14 +45,14 @@ public class MyScrollView extends LinearLayout {
     private LinearLayout thisLayout;
     private int topHeight = 0;
 
-    public MyScrollView(Context context) {
+    public Example(Context context) {
         super(context);
         mContext = context;
         init();
     }
 
 
-    public MyScrollView(Context context, AttributeSet attrs) {
+    public Example(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
         init();
@@ -88,6 +90,13 @@ public class MyScrollView extends LinearLayout {
 
             }
         });
+
+        topView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mContext.startActivity(new Intent(mContext, AnotherActivity.class));
+            }
+        });
     }
 
     private void initViewPager() {
@@ -96,6 +105,7 @@ public class MyScrollView extends LinearLayout {
         mScrollView = (ScrollView) view.findViewById(R.id.scrollView1);
         scrollView2 = (ScrollView) view.findViewById(R.id.scrollView2);
         scrollView3 = (ScrollView) view.findViewById(R.id.scrollView3);
+
         view.removeAllViews();
         list.add(mScrollView);
         list.add(scrollView2);

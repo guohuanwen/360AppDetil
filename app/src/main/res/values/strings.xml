@@ -209,4 +209,5 @@ import android.widget.ListView;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
     </string>
+    <color name="red">#e51c23</color>
 </resources>
