@@ -1,6 +1,6 @@
 #Application  
-项目将scrollview换成viewpager后，出现bug，暂时没有修复。仿照[这个项目](https://github.com/hongyangAndroid/Android-StickyNavLayout)写的，
+仿照[这个项目](https://github.com/hongyangAndroid/Android-StickyNavLayout)写的  
+开始直接按他的思路写的，后来发现其实另一个方法更好，详情见demo  
 #DEMO
 ![](https://github.com/guohuanwen/360AppDetil/blob/master/screenShots/gif.gif)  
-#新增联动效果  
-![](https://github.com/guohuanwen/360AppDetil/blob/master/screenShots/gif1.gif)
+
